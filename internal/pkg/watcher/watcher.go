@@ -35,8 +35,9 @@ func (w *Watcher) Start() error {
 		defer wg.Done()
 		for {
 			select {
-			case <-w.inCh:
+			case str := <-w.inCh:
 				w.counter.Iteration += 1
+				w.counter.HexString = str
 				select {
 				case w.outCh <- w.counter:
 				case <-w.quitChannel:
