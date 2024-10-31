@@ -19,7 +19,7 @@ type Server struct {
 	server       *http.Server                // Gorilla HTTP server.
 	watchers     map[string]*watcher.Watcher // Counter watchers (k: counterId).
 	watchersLock *sync.RWMutex               // Counter lock.
-	sessionStats []sessionStats              // Session stats.
+	sessionStats []*sessionStats              // Session stats.
 	quitChannel  chan struct{}               // Quit channel.
 	running      sync.WaitGroup              // Running goroutines.
 }
@@ -30,7 +30,7 @@ func New(strChan <-chan string) *Server {
 	s.server = nil // Set below.
 	s.watchers = make(map[string]*watcher.Watcher)
 	s.watchersLock = &sync.RWMutex{}
-	s.sessionStats = []sessionStats{}
+	s.sessionStats = []*sessionStats{}
 	s.quitChannel = make(chan struct{})
 	s.running = sync.WaitGroup{}
 	return &s
@@ -99,4 +99,16 @@ func (s *Server) mainLoop() {
 			return
 		}
 	}
+}
+
+func (s *Server) incStats(id string) {
+	// Find and increment.
+	for _, ws := range s.sessionStats {
+		if ws.id == id {
+			ws.inc()
+			return
+		}
+	}
+	// Not found, add new.
+	s.sessionStats = append(s.sessionStats, &sessionStats{id: id, sent: 1})
 }
