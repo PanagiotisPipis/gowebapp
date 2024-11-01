@@ -36,10 +36,10 @@ func (s *Server) handlerWebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer func() { _ = c.Close() }()
-	id := watch.GetWatcherId()
-	log.Printf("websocket started for watcher %s\n", id)
+
+	log.Printf("websocket started for watcher %s\n", watch.GetWatcherId())
 	defer func() {
-		log.Printf("websocket stopped for watcher %s\n", id)
+		log.Printf("websocket stopped for watcher %s\n", watch.GetWatcherId())
 	}()
 
 	// Read done.
@@ -48,8 +48,6 @@ func (s *Server) handlerWebSocket(w http.ResponseWriter, r *http.Request) {
 	// All done.
 	doneCh := make(chan struct{})
 	defer close(doneCh)
-
-	err = c.WriteMessage(websocket.TextMessage, []byte(id))
 
 	go func() {
 		defer close(readDoneCh)

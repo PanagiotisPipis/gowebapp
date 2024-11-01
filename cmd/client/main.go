@@ -40,7 +40,7 @@ func main() {
 	for i := 0; i < requested_connections; i++ {
 		wg.Add(1)
 		new_connection := goclient.New()
-		go new_connection.Connect(u, shutdown, &wg)
+		go new_connection.Connect(i, u, shutdown, &wg)
 	}
 	wg.Wait()
 }

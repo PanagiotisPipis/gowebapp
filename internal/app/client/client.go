@@ -9,7 +9,7 @@ import (
 )
 
 type Connection struct {
-	id string
+	id int
 	socket *websocket.Conn
 }
 
@@ -18,7 +18,7 @@ func New() *Connection {
 	return con
 }
 
-func (connection *Connection) Connect(u url.URL, shutdown chan struct{}, wg *sync.WaitGroup) {
+func (connection *Connection) Connect(id int, u url.URL, shutdown chan struct{}, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	var err error
@@ -31,14 +31,7 @@ func (connection *Connection) Connect(u url.URL, shutdown chan struct{}, wg *syn
 
 	done := make(chan struct{})
 
-	//Send id to client
-	_, id, err := connection.socket.ReadMessage()
-	if err != nil {
-		log.Println("read id:", err)
-		return
-	}
-	//Store id per connection
-	connection.id = string(id)
+	connection.id = id
 
 	go func() {
 		defer close(done)
@@ -48,7 +41,7 @@ func (connection *Connection) Connect(u url.URL, shutdown chan struct{}, wg *syn
 				log.Println("read:", err)
 				return
 			}
-			log.Printf("(%s) recv: %s", connection.id, message)
+			log.Printf("[conn #%d] recv: %s", connection.id, message)
 		}
 	}()
 
@@ -57,7 +50,7 @@ func (connection *Connection) Connect(u url.URL, shutdown chan struct{}, wg *syn
 		case <-done:
 			return
 		case <-shutdown:
-			log.Println("Shutting down connection")
+			log.Printf("Shutting down connection #%d", connection.id)
 
 			// Cleanly close the connection by sending a close message and then
 			// waiting (with timeout) for the server to close the connection.
@@ -66,7 +59,7 @@ func (connection *Connection) Connect(u url.URL, shutdown chan struct{}, wg *syn
 				log.Println("write close:", err)
 				return
 			}
-			
+
 			<-done
 			
 			return
