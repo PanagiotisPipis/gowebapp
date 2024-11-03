@@ -3,9 +3,12 @@ package httpsrv
 import (
 	"html/template"
 	"net/http"
+	"log"
+    "github.com/gorilla/csrf"
 )
 
 func (s *Server) handlerHome(w http.ResponseWriter, r *http.Request) {
+	log.Println("Token:", csrf.Token(r))
 	template.Must(template.New("").Parse(`
 <!DOCTYPE html>
 <html>

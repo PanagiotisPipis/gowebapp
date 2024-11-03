@@ -34,6 +34,18 @@ func (s *Server) myRoutes() []Route {
 			Pattern: "/goapp",
 			HFunc:   s.handlerWrapper(s.handlerHome),
 		},
+		{
+			Name:    "login",
+			Method:  "GET",
+			Pattern: "/goapp/login",
+			HFunc:   s.handlerWrapper(s.handlerLogin),
+		},
+		{
+			Name:    "login",
+			Method:  "POST",
+			Pattern: "/goapp/login",
+			HFunc:   s.handlerWrapper(s.handlerLogin),
+		},
 	}
 }
 
@@ -45,6 +57,7 @@ func (s *Server) handlerWrapper(handlerFunc func(http.ResponseWriter, *http.Requ
 				s.error(w, http.StatusInternalServerError, fmt.Errorf("%v\n%v", r, string(debug.Stack())))
 			}
 		}()
+
 		handlerFunc(w, r)
 	})
 }

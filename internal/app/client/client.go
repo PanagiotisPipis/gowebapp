@@ -2,10 +2,11 @@ package goclient
 
 import (
 	"log"
+	"net/http"
 	"net/url"
 	"sync"
-	"github.com/gorilla/websocket"
 
+	"github.com/gorilla/websocket"
 )
 
 type Connection struct {
@@ -22,8 +23,14 @@ func (connection *Connection) Connect(id int, u url.URL, shutdown chan struct{},
 	defer wg.Done()
 
 	var err error
+	var resp *http.Response
 
-	connection.socket, _, err = websocket.DefaultDialer.Dial(u.String(), nil)
+	connection.socket, resp, err = websocket.DefaultDialer.Dial(u.String(), nil)
+	for k, v := range resp.Header {
+		log.Print(k)
+		log.Print(" : ")
+		log.Println(v)
+	}
 	if err != nil {
 		log.Fatal("dial:", err)
 	}
