@@ -7,11 +7,11 @@ import (
 )
 
 type Route struct {
-	Name    	string
-	Method  	string
-	Pattern 	string
-	HFunc   	http.Handler
-	Queries 	[]string
+	Name    string
+	Method  string
+	Pattern string
+	HFunc   http.Handler
+	Queries []string
 }
 
 func (s *Server) myRoutes() []Route {
