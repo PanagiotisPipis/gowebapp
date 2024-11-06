@@ -57,11 +57,15 @@ $ ./bin/client -c 3
 ## Profiling
 
 Metrics for heap before and after refactor of websocket for memory usage.
+[pprof.server.alloc_objects.alloc_space.inuse_objects.inuse_space.before_refactor.pb.gz](https://github.com/user-attachments/files/17654264/pprof.server.alloc_objects.alloc_space.inuse_objects.inuse_space.before_refactor.pb.gz)
+[pprof.server.alloc_objects.alloc_space.inuse_objects.inuse_space.after_refactor.pb.gz](https://github.com/user-attachments/files/17654265/pprof.server.alloc_objects.alloc_space.inuse_objects.inuse_space.after_refactor.pb.gz)
+
+
 
 Files can be viewed using pprof tool like:
 
-        go tool pprof -http=:8081 profiling/pprof.server.alloc_objects.alloc_space.inuse_objects.inuse_space.before_refactor.pb.gz
+        go tool pprof -http=:8081 pprof.server.alloc_objects.alloc_space.inuse_objects.inuse_space.before_refactor.pb.gz
 
 or to compare:
 
-        go tool pprof -http=:8081 -diff_base profiling/pprof.server.alloc_objects.alloc_space.inuse_objects.inuse_space.before_refactor.pb.gz profiling/pprof.server.alloc_objects.alloc_space.inuse_objects.inuse_space.after_refactor.pb.gz 
+        go tool pprof -http=:8081 -diff_base pprof.server.alloc_objects.alloc_space.inuse_objects.inuse_space.before_refactor.pb.gz pprof.server.alloc_objects.alloc_space.inuse_objects.inuse_space.after_refactor.pb.gz 
