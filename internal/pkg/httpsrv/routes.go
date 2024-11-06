@@ -18,7 +18,7 @@ func (s *Server) myRoutes() []Route {
 	return []Route{
 		{
 			Name:    "health",
-			Method:  "POST",
+			Method:  "GET",
 			Pattern: "/goapp/health",
 			HFunc:   s.handlerWrapper(s.handlerHealth),
 		},
