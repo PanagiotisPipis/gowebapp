@@ -2,6 +2,7 @@ package httpsrv
 
 import (
 	"context"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -10,9 +11,9 @@ import (
 
 	"goapp/internal/pkg/watcher"
 
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/csrf"
 )
 
 type Server struct {
@@ -23,6 +24,7 @@ type Server struct {
 	sessionStats []*sessionStats              // Session stats.
 	quitChannel  chan struct{}               // Quit channel.
 	running      sync.WaitGroup              // Running goroutines.
+	templates	*template.Template			 // Html templates
 	
 }
 
@@ -35,6 +37,7 @@ func New(strChan <-chan string) *Server {
 	s.sessionStats = []*sessionStats{}
 	s.quitChannel = make(chan struct{})
 	s.running = sync.WaitGroup{}
+	s.templates = template.Must(template.New("home").Parse(homeTemplate()))
 	return &s
 }
 

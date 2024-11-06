@@ -1,14 +1,20 @@
 package httpsrv
 
 import (
-	"html/template"
 	"net/http"
     "github.com/gorilla/csrf"
 )
 
 func (s *Server) handlerHome(w http.ResponseWriter, r *http.Request) {
-    template.Must(template.New("").Parse(`
-<!DOCTYPE html>
+    tmplData := map[string]interface{}{
+        "WsUrl":"ws://"+r.Host+"/goapp/ws",
+        csrf.TemplateTag: csrf.TemplateField(r),
+    }
+    s.templates.ExecuteTemplate(w, "home", tmplData)
+}
+
+func homeTemplate() string {
+    template := `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -98,6 +104,6 @@ You can change the message and send multiple times.
 </td></tr></table>
 </body>
 </html>
-`)).Execute(w, map[string]interface{}{
-    "WsUrl":"ws://"+r.Host+"/goapp/ws", csrf.TemplateTag: csrf.TemplateField(r)})
+`
+return template
 }
