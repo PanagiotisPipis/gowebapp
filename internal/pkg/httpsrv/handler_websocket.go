@@ -9,23 +9,9 @@ import (
 	"goapp/internal/pkg/watcher"
 
 	"github.com/gorilla/websocket"
-	"github.com/gorilla/csrf"
 )
 
 func (s *Server) handlerWebSocket(w http.ResponseWriter, r *http.Request) {
-	log.Println("Token:", csrf.Token(r))
-
-	session, _ := s.store.Get(r, "session.id")
-	authenticated := session.Values["authenticated"]
-	if authenticated != nil && authenticated != false {
-		w.WriteHeader(http.StatusOK)
-		return
-	} else {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-    	return
-	}
-
-	//session, err := s.store.Get(r, "session-name")
 	// Create and start a watcher.
 	var watch = watcher.New()
 	if err := watch.Start(); err != nil {
@@ -38,7 +24,7 @@ func (s *Server) handlerWebSocket(w http.ResponseWriter, r *http.Request) {
 	defer s.removeWatcher(watch)
 
 	// Start WS.
-	var upgrader = websocket.Upgrader{
+	var upgrader = websocket.Upgrader {
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},

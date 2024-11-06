@@ -7,18 +7,18 @@ import (
 )
 
 type Route struct {
-	Name    string
-	Method  string
-	Pattern string
-	HFunc   http.Handler
-	Queries []string
+	Name    	string
+	Method  	string
+	Pattern 	string
+	HFunc   	http.Handler
+	Queries 	[]string
 }
 
 func (s *Server) myRoutes() []Route {
 	return []Route{
 		{
 			Name:    "health",
-			Method:  "GET",
+			Method:  "POST",
 			Pattern: "/goapp/health",
 			HFunc:   s.handlerWrapper(s.handlerHealth),
 		},
@@ -35,16 +35,10 @@ func (s *Server) myRoutes() []Route {
 			HFunc:   s.handlerWrapper(s.handlerHome),
 		},
 		{
-			Name:    "login",
-			Method:  "GET",
-			Pattern: "/goapp/login",
-			HFunc:   s.handlerWrapper(s.handlerLogin),
-		},
-		{
-			Name:    "login",
+			Name:    "restricted",
 			Method:  "POST",
-			Pattern: "/goapp/login",
-			HFunc:   s.handlerWrapper(s.handlerLogin),
+			Pattern: "/goapp/restricted",
+			HFunc:   s.handlerWrapper(s.handlerRestricted),
 		},
 	}
 }
@@ -57,7 +51,7 @@ func (s *Server) handlerWrapper(handlerFunc func(http.ResponseWriter, *http.Requ
 				s.error(w, http.StatusInternalServerError, fmt.Errorf("%v\n%v", r, string(debug.Stack())))
 			}
 		}()
-
+		
 		handlerFunc(w, r)
 	})
 }

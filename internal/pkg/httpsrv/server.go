@@ -13,7 +13,6 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/csrf"
-	"github.com/gorilla/sessions"
 )
 
 type Server struct {
@@ -24,7 +23,6 @@ type Server struct {
 	sessionStats []*sessionStats              // Session stats.
 	quitChannel  chan struct{}               // Quit channel.
 	running      sync.WaitGroup              // Running goroutines.
-	store		 *sessions.CookieStore
 	
 }
 
@@ -37,27 +35,32 @@ func New(strChan <-chan string) *Server {
 	s.sessionStats = []*sessionStats{}
 	s.quitChannel = make(chan struct{})
 	s.running = sync.WaitGroup{}
-	s.store = sessions.NewCookieStore([]byte("mySecret"))
 	return &s
 }
 
 func (s *Server) Start() error {
 	// Create router.
 	r := mux.NewRouter()
-	csrfMiddleware := csrf.Protect([]byte("32-byte-long-auth-key"), )
+	key := []byte("D7INRg1qt4kkJbyltvv44hDaoKuTU84k")
+
+    
+	csrfMiddleware := csrf.Protect(key,
+		csrf.Secure(false),                 // false in development only!
+		csrf.CookieName("session-id"),
+	)
 	r.Use(csrfMiddleware)
-	
-	// Register routes.
+
 	for _, route := range s.myRoutes() {
 		if route.Method == "ANY" {
 			r.Handle(route.Pattern, route.HFunc)
 		} else {
-			r.Handle(route.Pattern, csrfMiddleware(route.HFunc)).Methods(route.Method)
+			r.Handle(route.Pattern, route.HFunc).Methods(route.Method)
 			if route.Queries != nil {
 				r.Handle(route.Pattern, route.HFunc).Methods(route.Method).Queries(route.Queries...)
 			}
 		}
 	}
+
 
 	// Create HTTP server.
 	s.server = &http.Server{

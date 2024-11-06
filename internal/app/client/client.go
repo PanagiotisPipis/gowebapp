@@ -2,7 +2,6 @@ package goclient
 
 import (
 	"log"
-	"net/http"
 	"net/url"
 	"sync"
 
@@ -14,7 +13,7 @@ type Connection struct {
 	socket *websocket.Conn
 }
 
-func New() *Connection {
+func New(username string, password string) *Connection {
 	con := new(Connection)
 	return con
 }
@@ -23,14 +22,8 @@ func (connection *Connection) Connect(id int, u url.URL, shutdown chan struct{},
 	defer wg.Done()
 
 	var err error
-	var resp *http.Response
 
-	connection.socket, resp, err = websocket.DefaultDialer.Dial(u.String(), nil)
-	for k, v := range resp.Header {
-		log.Print(k)
-		log.Print(" : ")
-		log.Println(v)
-	}
+	connection.socket, _, err = websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
 		log.Fatal("dial:", err)
 	}

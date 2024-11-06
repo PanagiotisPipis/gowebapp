@@ -3,13 +3,11 @@ package httpsrv
 import (
 	"html/template"
 	"net/http"
-	"log"
     "github.com/gorilla/csrf"
 )
 
 func (s *Server) handlerHome(w http.ResponseWriter, r *http.Request) {
-	log.Println("Token:", csrf.Token(r))
-	template.Must(template.New("").Parse(`
+    template.Must(template.New("").Parse(`
 <!DOCTYPE html>
 <html>
 <head>
@@ -25,11 +23,22 @@ window.addEventListener("load", function(evt) {
         output.appendChild(d);
         output.scroll(0, output.scrollHeight);
     };
+    async function GetRestricted() {
+        try {
+            const response = await fetch("http://localhost:8080/restricted", {
+            method: "POST",
+            // Set the FormData instance as the request body
+            });
+            console.log(await response.json());
+        } catch (e) {
+            console.error(e);
+        }
+    }
     document.getElementById("open").onclick = function(evt) {
         if (ws) {
             return false;
         }
-        ws = new WebSocket("{{.}}");
+        ws = new WebSocket("{{.WsUrl}}");
         ws.onopen = function(evt) {
             print("OPEN");
         }
@@ -60,6 +69,9 @@ window.addEventListener("load", function(evt) {
         ws.close();
         return false;
     };
+    document.getElementById("restrictedButton").onclick = function(evt) {
+        GetRestricted()
+    }
 });
 </script>
 </head>
@@ -76,10 +88,16 @@ You can change the message and send multiple times.
 <p><input id="input" type="text" value="{}">
 <button id="send">Reset</button>
 </form>
+<p>
+<form action="/goapp/restricted" method="post">
+<button id="restrictedButton">Restricted</button>
+{{ .csrfField }}
+</form>
 </td><td valign="top" width="50%">
 <div id="output" style="max-height: 70vh;overflow-y: scroll;"></div>
 </td></tr></table>
 </body>
 </html>
-`)).Execute(w, "ws://"+r.Host+"/goapp/ws")
+`)).Execute(w, map[string]interface{}{
+    "WsUrl":"ws://"+r.Host+"/goapp/ws", csrf.TemplateTag: csrf.TemplateField(r)})
 }
