@@ -24,7 +24,7 @@ func (s *Server) handlerWebSocket(w http.ResponseWriter, r *http.Request) {
 	defer s.removeWatcher(watch)
 
 	// Start WS.
-	var upgrader = websocket.Upgrader{
+	var upgrader = websocket.Upgrader {
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},

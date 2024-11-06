@@ -34,6 +34,12 @@ func (s *Server) myRoutes() []Route {
 			Pattern: "/goapp",
 			HFunc:   s.handlerWrapper(s.handlerHome),
 		},
+		{
+			Name:    "restricted",
+			Method:  "POST",
+			Pattern: "/goapp/restricted",
+			HFunc:   s.handlerWrapper(s.handlerRestricted),
+		},
 	}
 }
 
@@ -45,6 +51,7 @@ func (s *Server) handlerWrapper(handlerFunc func(http.ResponseWriter, *http.Requ
 				s.error(w, http.StatusInternalServerError, fmt.Errorf("%v\n%v", r, string(debug.Stack())))
 			}
 		}()
+		
 		handlerFunc(w, r)
 	})
 }

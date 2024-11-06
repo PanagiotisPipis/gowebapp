@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/url"
 	"sync"
-	"github.com/gorilla/websocket"
 
+	"github.com/gorilla/websocket"
 )
 
 type Connection struct {

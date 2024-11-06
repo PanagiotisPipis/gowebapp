@@ -12,6 +12,7 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/csrf"
 )
 
 type Server struct {
@@ -22,6 +23,7 @@ type Server struct {
 	sessionStats []*sessionStats              // Session stats.
 	quitChannel  chan struct{}               // Quit channel.
 	running      sync.WaitGroup              // Running goroutines.
+	
 }
 
 func New(strChan <-chan string) *Server {
@@ -39,8 +41,15 @@ func New(strChan <-chan string) *Server {
 func (s *Server) Start() error {
 	// Create router.
 	r := mux.NewRouter()
+	key := []byte("D7INRg1qt4kkJbyltvv44hDaoKuTU84k")
 
-	// Register routes.
+    
+	csrfMiddleware := csrf.Protect(key,
+		csrf.Secure(false),                 // false in development only!
+		csrf.CookieName("session-id"),
+	)
+	r.Use(csrfMiddleware)
+
 	for _, route := range s.myRoutes() {
 		if route.Method == "ANY" {
 			r.Handle(route.Pattern, route.HFunc)
@@ -51,6 +60,7 @@ func (s *Server) Start() error {
 			}
 		}
 	}
+
 
 	// Create HTTP server.
 	s.server = &http.Server{
@@ -99,16 +109,4 @@ func (s *Server) mainLoop() {
 			return
 		}
 	}
-}
-
-func (s *Server) incStats(id string) {
-	// Find and increment.
-	for _, ws := range s.sessionStats {
-		if ws.id == id {
-			ws.inc()
-			return
-		}
-	}
-	// Not found, add new.
-	s.sessionStats = append(s.sessionStats, &sessionStats{id: id, sent: 1})
 }

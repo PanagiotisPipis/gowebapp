@@ -19,6 +19,7 @@ var addr = flag.String("addr", "localhost:8080", "http service address")
 
 func main() {
 	var requested_connections int
+	
 	flag.IntVar(&requested_connections, "c", 1, "number of connections to ws")
 	flag.Parse()
 	log.SetFlags(0)
@@ -32,7 +33,7 @@ func main() {
 		log.Println("interrupt")
 		close(shutdown)
 	}()
-
+	
 	u := url.URL{Scheme: "ws", Host: *addr, Path: "/goapp/ws"}
 	log.Printf("connecting to %s", u.String())
 
