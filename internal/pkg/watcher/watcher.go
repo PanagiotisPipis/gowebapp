@@ -2,6 +2,7 @@ package watcher
 
 import (
 	"sync"
+	"encoding/json"
 
 	"github.com/google/uuid"
 )
@@ -9,7 +10,7 @@ import (
 type Watcher struct {
 	id          string         // Watcher ID.
 	inCh        chan string    // Input channel.
-	outCh       chan *Counter  // Updates to counter will notify this channel.
+	outCh       chan []byte  // Updates to counter will notify this channel.
 	counter     *Counter       // The counter.
 	counterLock *sync.RWMutex  // Lock for counter.
 	quitChannel chan struct{}  // Quit.
@@ -20,7 +21,7 @@ func New() *Watcher {
 	w := Watcher{}
 	w.id = uuid.NewString()
 	w.inCh = make(chan string, 1)
-	w.outCh = make(chan *Counter, 1)
+	w.outCh = make(chan []byte, 1)
 	w.counter = &Counter{Iteration: 0}
 	w.counterLock = &sync.RWMutex{}
 	w.quitChannel = make(chan struct{})
@@ -38,8 +39,9 @@ func (w *Watcher) Start() error {
 			case str := <-w.inCh:
 				w.counter.Iteration += 1
 				w.counter.HexString = str
+				data, _ := json.Marshal(w.counter)
 				select {
-				case w.outCh <- w.counter:
+				case w.outCh <- data:
 				case <-w.quitChannel:
 					return
 				}
@@ -64,16 +66,16 @@ func (w *Watcher) GetWatcherId() string { return w.id }
 
 func (w *Watcher) Send(str string) { w.inCh <- str }
 
-func (w *Watcher) Recv() <-chan *Counter { return w.outCh }
+func (w *Watcher) Recv() <-chan []byte { return w.outCh }
 
 func (w *Watcher) ResetCounter() {
 	w.counterLock.Lock()
 	defer w.counterLock.Unlock()
 
 	w.counter.Iteration = 0
-
+	data, _ := json.Marshal(w.counter)
 	select {
-	case w.outCh <- w.counter:
+	case w.outCh <- data:
 	case <-w.quitChannel:
 		return
 	}
