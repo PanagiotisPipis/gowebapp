@@ -13,7 +13,7 @@ type Connection struct {
 	socket *websocket.Conn
 }
 
-func New(username string, password string) *Connection {
+func New() *Connection {
 	con := new(Connection)
 	return con
 }

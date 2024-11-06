@@ -60,3 +60,6 @@ Thumbs.db
 /private
 *.code-workspace
 bin/*
+
+# VS Code
+.vscode/
