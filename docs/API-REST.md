@@ -14,3 +14,8 @@ The message sent by the client to reset the counter:
 | _health_ |
 
 Returns an HTTP code for health status.
+
+## [POST /goapp/restricted](#restricted)
+
+
+Returns an HTTP code for making successful request.

@@ -6,38 +6,16 @@ An application for Go knowledge assessment.
 
 This is a web application that utilises websockets. A client connects on `localhost:8080` and has three options: a) `open` a websocket connection that reads values from a counter b) `close` the websocket and c) reset the counter to zero. The counter is feeded from a random string generator. On WS session termination, statistics for terminated session are printed.
 
+## Build the application
 The application is compiled by running `make` in the root folder and the final binaries are found in the `bin/` folder.
 
-The application has some problems described below that need to be addressed plus some new features that need implementation.
+The binaries created are *server* and *client* executables
 
-## Problems
+## Server
 
-### #1
+### Endpoints
 
-The server prints statistics for each WS sessioned closed but it seems to only count one message while there are more send to each WS session, e.g.
-
-```
-2024/03/29 18:28:38 stats.go:11: session a938e316-8536-46e6-8633-bd309fbcf579 has received 1 messages
-```
-
-### #2
-
-A more then normal memory usage is observed after many WS sessions which needs investigation.
-
-### #3
-
-A cross-site request forgery is reported by a security audit which needs fixing.
-
-## New features
-
-### A
-
-Modify the random string generator to generate only hex values and verify its accuracy and resource usage by creating a test and a benchmark run.
-
-### B
-
-Extent the API to also return the Hex value in WS connection. I.e. a browser that open a connection to `localhost:8080` should see the HEX values.
-
+**/goapp** : Returns main html page with controls for websocket.\ User can open and close a websocket connection. Upon connected counter info will be diplayed in page.\
 E.g.
 
 ```
@@ -48,18 +26,42 @@ RESPONSE: {"iteration":3,"value":"05DCC3B6AB"}
 CLOSE
 ```
 
-### C
+Supported Methods: GET\
+**/goapp/ws**: Websocket endpoint.\
+Supported Methods: GET\
+**/goapp/health**: Healthcheck endpoint. Returns success string.\
+Supported Methods: GET\
+**/goapp/restricted**: Return succcess string. Use for csrf demo. Try sending post request from a rest client to get csrf error.\
+Supported Methods: POST\
 
-Create a command line client as a separate application that opens a requested number of sessions simultaneously.
+### Websocket
 
-This should be a separate executable generated with the `make` command in the `bin/` folder that will accept an argument with the number of parallel connections that will open on the server. The server part must be modified in a way to support multiple parallel connections and should still print valid statistics for each connection.
+Upon successful connection, server will notify all clients with a per connection counter and a hexstring.\
+Hexstring is always the same for all clients.\
+To start the server just run the server executable
 
-E.g.
+`./bin/server`
+
+## Client
+
+Client opens given number of websocket connections to server. It prints the iteration counter and the hexstring received by the server for every connection
 
 ```
-$ ./bin/client -n 3
+$ ./bin/client -c 3
 [conn #0] iteration: 1, value: 66D53ED788
 [conn #1] iteration: 1, value: 66D53ED788
 [conn #2] iteration: 1, value: 66D53ED788
 ...
 ```
+
+## Profiling
+
+Metrics for heap before and after refactor of websocket for memory usage.
+
+Files can be viewed using pprof tool like:
+
+        go tool pprof -http=:8081 profiling/pprof.server.alloc_objects.alloc_space.inuse_objects.inuse_space.before_refactor.pb.gz
+
+or to compare:
+
+        go tool pprof -http=:8081 -diff_base profiling/pprof.server.alloc_objects.alloc_space.inuse_objects.inuse_space.before_refactor.pb.gz profiling/pprof.server.alloc_objects.alloc_space.inuse_objects.inuse_space.after_refactor.pb.gz 
