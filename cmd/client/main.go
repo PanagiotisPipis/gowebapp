@@ -19,11 +19,8 @@ var addr = flag.String("addr", "localhost:8080", "http service address")
 
 func main() {
 	var requested_connections int
-	var username string
-	var password string
+	
 	flag.IntVar(&requested_connections, "c", 1, "number of connections to ws")
-	flag.StringVar(&username, "user", "", "username")
-	flag.StringVar(&password, "password", "", "password")
 	flag.Parse()
 	log.SetFlags(0)
 	log.Println("connections:", requested_connections)
@@ -43,7 +40,7 @@ func main() {
 	var wg sync.WaitGroup
 	for i := 0; i < requested_connections; i++ {
 		wg.Add(1)
-		new_connection := goclient.New(username, password)
+		new_connection := goclient.New()
 		go new_connection.Connect(i, u, shutdown, &wg)
 	}
 	wg.Wait()
